@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách sản phẩm</title>
+    <style>
+        .products-container {
+            padding: 20px 0;
+        }
+        
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .products-header h1 {
+            color: white;
+            font-weight: 700;
+            font-size: 2rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-create {
+            background: linear-gradient(90deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+        
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(39, 174, 96, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+        }
+        
+        .product-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-name {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .product-category {
+            display: inline-block;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            width: fit-content;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+        
+        .product-price::before {
+            content: "₫ ";
+            font-size: 1rem;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+        
+        .btn-edit, .btn-delete {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #2980b9;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #c0392b;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+        
+        .empty-state h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="products-container">
+    <div class="products-header">
+        <h1>
+            <i class="fas fa-box"></i> Danh sách sản phẩm
+        </h1>
+        <a th:href="@{/products/create}" class="btn-create">
+            <i class="fas fa-plus"></i> Thêm sản phẩm mới
+        </a>
+    </div>
+    
+    <div th:if="${#lists.isEmpty(listProduct)}" class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-inbox"></i>
+        </div>
+        <h2>Không có sản phẩm nào</h2>
+        <p>Hãy thêm sản phẩm đầu tiên của bạn</p>
+        <a th:href="@{/products/create}" class="btn-create">
+            <i class="fas fa-plus"></i> Thêm sản phẩm
+        </a>
+    </div>
+    
+    <div th:if="${not #lists.isEmpty(listProduct)}" class="products-grid">
+        <div th:each="product : ${listProduct}" class="product-card">
+            <img th:if="${product.image}" 
+                 th:src="@{/images/} + ${product.image}" 
+                 alt="${product.name}" 
+                 class="product-image">
+            <img th:if="not ${product.image}" 
+                 src="https://via.placeholder.com/280x220?text=No+Image" 
+                 alt="No Image" 
+                 class="product-image">
+            
+            <div class="product-body">
+                <h3 class="product-name" th:text="${product.name}"></h3>
+                <span class="product-category" th:text="${product.category.name}"></span>
+                <div class="product-price" th:text="${product.price}"></div>
+                
+                <div class="product-actions">
+                    <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn-edit">
+                        <i class="fas fa-edit"></i> Sửa
+                    </a>
+                    <a th:href="@{/products/delete/{id}(id=${product.id})}" 
+                       class="btn-delete"
+                       onclick="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?')">
+                        <i class="fas fa-trash"></i> Xóa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
