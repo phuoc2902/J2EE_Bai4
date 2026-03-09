@@ -24,61 +24,64 @@ public class ProductController {
     @Autowired
     private CategoryService categoryService;
 
+    // Hiển thị danh sách sản phẩm
     @GetMapping
-    public String index(Model model) {
-        model.addAttribute("listProduct", productService.getAll());
+    public String list(Model model) {
+        List<Product> products = productService.getAllProducts();
+        model.addAttribute("products", products);
         return "product/products";
     }
 
-    @GetMapping("/create")
-    public String create(Model model) {
+    // Mở form thêm sản phẩm
+    @GetMapping("/add")
+    public String add(Model model) {
         model.addAttribute("product", new Product());
-        model.addAttribute("categories", categoryService.getAll());
-        return "product/create";
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "product/add";
     }
 
-    @PostMapping("/create")
-    public String create(@Valid Product newProduct, BindingResult result, @RequestParam MultipartFile imageProduct, Model model) {
+    // Lưu sản phẩm mới hoặc cập nhật
+    @PostMapping("/save")
+    public String save(@Valid Product product, BindingResult result, @RequestParam(value = "imageProduct", required = false) MultipartFile imageProduct, Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("product", newProduct);
-            model.addAttribute("categories", categoryService.getAll());
-            return "product/create";
+            model.addAttribute("product", product);
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "product/add";
         }
-        if (!imageProduct.isEmpty()) {
-            productService.updateImage(newProduct, imageProduct);
-        }
-        Category selectedCategory = categoryService.get(newProduct.getCategory().getId());
-        newProduct.setCategory(selectedCategory);
-        productService.add(newProduct);
-        return "redirect:/products";
-    }
 
-    @GetMapping("/edit/{id}")
-    public String edit(@PathVariable int id, Model model) {
-        Product find = productService.get(id);
-        if (find == null) {
-            return "error/404"; // Trang lỗi tùy chỉnh
-        }
-        model.addAttribute("product", find);
-        model.addAttribute("categories", categoryService.getAll());
-        return "product/edit";
-    }
-
-    @PostMapping("/edit")
-    public String edit(@Valid Product editProduct, BindingResult bindingResult, @RequestParam MultipartFile imageProduct, Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("product", editProduct);
-            model.addAttribute("categories", categoryService.getAll());
-            return "product/edit";
-        }
+        // Xử lý upload hình ảnh nếu có
         if (imageProduct != null && !imageProduct.isEmpty()) {
-            productService.updateImage(editProduct, imageProduct);
+            productService.updateImage(product, imageProduct);
         }
-        Category selectedCategory = categoryService.get(editProduct.getCategory().getId());
-        editProduct.setCategory(selectedCategory);
-        productService.update(editProduct);
+
+        // Lấy category từ database
+        Category selectedCategory = categoryService.getCategoryById(product.getCategory().getId());
+        product.setCategory(selectedCategory);
+
+        // Lưu sản phẩm
+        productService.saveProduct(product);
         return "redirect:/products";
     }
 
-    // TODO: Implement delete functionality
+    // Mở form sửa sản phẩm
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable Integer id, Model model) {
+        Product product = productService.getProductById(id);
+        if (product == null) {
+            return "error/404";
+        }
+        model.addAttribute("product", product);
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "product/add";
+    }
+
+    // Xóa sản phẩm
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable Integer id) {
+        Product product = productService.getProductById(id);
+        if (product != null) {
+            productService.deleteProduct(id);
+        }
+        return "redirect:/products";
+    }
 }

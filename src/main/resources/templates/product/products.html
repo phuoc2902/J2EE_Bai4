@@ -199,24 +199,24 @@
         <h1>
             <i class="fas fa-box"></i> Danh sách sản phẩm
         </h1>
-        <a th:href="@{/products/create}" class="btn-create">
+        <a th:href="@{/products/add}" class="btn-create">
             <i class="fas fa-plus"></i> Thêm sản phẩm mới
         </a>
     </div>
     
-    <div th:if="${#lists.isEmpty(listProduct)}" class="empty-state">
+    <div th:if="${#lists.isEmpty(products)}" class="empty-state">
         <div class="empty-state-icon">
             <i class="fas fa-inbox"></i>
         </div>
         <h2>Không có sản phẩm nào</h2>
         <p>Hãy thêm sản phẩm đầu tiên của bạn</p>
-        <a th:href="@{/products/create}" class="btn-create">
+        <a th:href="@{/products/add}" class="btn-create">
             <i class="fas fa-plus"></i> Thêm sản phẩm
         </a>
     </div>
     
-    <div th:if="${not #lists.isEmpty(listProduct)}" class="products-grid">
-        <div th:each="product : ${listProduct}" class="product-card">
+    <div th:if="${not #lists.isEmpty(products)}" class="products-grid">
+        <div th:each="product : ${products}" class="product-card">
             <img th:if="${product.image}" 
                  th:src="@{/images/} + ${product.image}" 
                  alt="${product.name}" 

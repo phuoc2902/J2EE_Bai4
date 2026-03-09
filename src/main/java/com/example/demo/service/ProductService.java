@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Product;
+import com.example.demo.repository.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,44 +11,38 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class ProductService {
 
-    private List<Product> listProduct = new ArrayList<>();
+    @Autowired
+    private ProductRepository productRepository;
 
-    public ProductService() {
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
     }
 
-    public List<Product> getAll() {
-        return listProduct;
+    public Product getProductById(Integer id) {
+        Optional<Product> product = productRepository.findById(id);
+        return product.orElse(null);
     }
 
-    public Product get(int id) {
-        return listProduct.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
+    public void saveProduct(Product product) {
+        productRepository.save(product);
     }
 
-    public void add(Product newProduct) {
-        int maxId = listProduct.stream().mapToInt(Product::getId).max().orElse(0);
-        newProduct.setId(maxId + 1);
-        listProduct.add(newProduct);
+    public void updateProduct(Product product) {
+        productRepository.save(product);
     }
 
-    public void update(Product editProduct) {
-        Product find = get(editProduct.getId());
-        if (find != null) {
-            find.setPrice(editProduct.getPrice());
-            find.setName(editProduct.getName());
-            if (editProduct.getImage() != null) {
-                find.setImage(editProduct.getImage());
-            }
-        }
+    public void deleteProduct(Integer id) {
+        productRepository.deleteById(id);
     }
 
-    public void updateImage(Product newProduct, MultipartFile imageProduct) {
+    public void updateImage(Product product, MultipartFile imageProduct) {
         String contentType = imageProduct.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new IllegalArgumentException("Tệp tải lên không phải là hình ảnh!");
@@ -60,9 +56,9 @@ public class ProductService {
                 String newFileName = UUID.randomUUID() + "_" + imageProduct.getOriginalFilename();
                 Path pathToFile = dirImages.resolve(newFileName);
                 Files.copy(imageProduct.getInputStream(), pathToFile, StandardCopyOption.REPLACE_EXISTING);
-                newProduct.setImage(newFileName);
+                product.setImage(newFileName);
             } catch (IOException e) {
-                e.printStackTrace(); // Handle the exception appropriately
+                throw new RuntimeException("Lỗi khi tải lên hình ảnh: " + e.getMessage(), e);
             }
         }
     }
